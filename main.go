@@ -13,11 +13,14 @@ import (
 	"github.com/fakhripraya/user-service/config"
 	"github.com/fakhripraya/user-service/data"
 	"github.com/fakhripraya/user-service/entities"
+	gohandlers "github.com/gorilla/handlers"
 	"github.com/hashicorp/go-hclog"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	"github.com/srinathgs/mysqlstore"
 )
+
+var sessionStore *mysqlstore.MySQLStore
 
 var err error
 
@@ -58,9 +61,6 @@ func main() {
 	}
 
 	defer config.DB.Close()
-
-	// Migrate all the defined table into the database
-	data.MigrateDB(config.DB)
 
 	// Creates a session store based on MYSQL database
 	// If table doesn't exist, creates a new one
