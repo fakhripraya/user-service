@@ -7,8 +7,8 @@ import (
 	"github.com/srinathgs/mysqlstore"
 )
 
-// KeyCredentials is a key used for the Credentials object in the context
-type KeyCredentials struct{}
+// KeyUser is a key used for the User object in the context
+type KeyUser struct{}
 
 // UserHandler is a handler struct for user changes
 type UserHandler struct {

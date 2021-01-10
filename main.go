@@ -13,16 +13,19 @@ import (
 	"github.com/fakhripraya/user-service/config"
 	"github.com/fakhripraya/user-service/data"
 	"github.com/fakhripraya/user-service/entities"
+	"github.com/fakhripraya/user-service/handlers"
 	gohandlers "github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"github.com/hashicorp/go-hclog"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	"github.com/srinathgs/mysqlstore"
 )
 
-var sessionStore *mysqlstore.MySQLStore
-
 var err error
+
+// Session Store based on MYSQL database
+var sessionStore *mysqlstore.MySQLStore
 
 // Adapter is an alias
 type Adapter func(http.Handler) http.Handler
@@ -38,6 +41,7 @@ func Adapt(handler http.Handler, adapters ...Adapter) http.Handler {
 }
 
 func main() {
+
 	// creates a structured logger for logging the entire program
 	logger := hclog.Default()
 
@@ -71,6 +75,39 @@ func main() {
 	}
 
 	defer sessionStore.Close()
+
+	// creates a user instance
+	user := data.NewUser(logger)
+
+	// creates the user handler
+	userHandler := handlers.NewUserHandler(logger, user, sessionStore)
+
+	// creates a new serve mux
+	serveMux := mux.NewRouter()
+
+	// handlers for the API
+	logger.Info("Setting handlers for the API")
+
+	// get handlers
+	getRequest := serveMux.Methods(http.MethodGet).Subrouter()
+
+	// get user handler
+	getRequest.HandleFunc("/", userHandler.GetUser)
+
+	// get global middleware
+	getRequest.Use(userHandler.MiddlewareValidateAuth)
+
+	// patch handlers
+	patchRequest := serveMux.Methods(http.MethodPatch).Subrouter()
+
+	// update signed in user patch handler
+	patchRequest.HandleFunc("/user/update/signed", userHandler.UpdateSignedUser)
+
+	// patch global middleware
+	patchRequest.Use(
+		userHandler.MiddlewareValidateAuth,
+		userHandler.MiddlewareParseUserRequest,
+	)
 
 	// CORS
 	corsHandler := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"*"}))
