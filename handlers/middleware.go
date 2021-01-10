@@ -21,7 +21,6 @@ func (userHandler *UserHandler) MiddlewareValidateAuth(next http.Handler) http.H
 			rw.WriteHeader(http.StatusInternalServerError)
 			data.ToJSON(&GenericError{Message: err.Error()}, rw)
 
-			// TODO: redirect to login
 			return
 		}
 
@@ -53,14 +52,12 @@ func (userHandler *UserHandler) MiddlewareValidateAuth(next http.Handler) http.H
 					rw.WriteHeader(http.StatusUnauthorized)
 					data.ToJSON(&GenericError{Message: err.Error()}, rw)
 
-					// TODO: redirect to login
 					return
 				}
 
 				rw.WriteHeader(http.StatusBadRequest)
 				data.ToJSON(&GenericError{Message: err.Error()}, rw)
 
-				// TODO: redirect to login
 				return
 			}
 
@@ -76,7 +73,6 @@ func (userHandler *UserHandler) MiddlewareValidateAuth(next http.Handler) http.H
 					rw.WriteHeader(http.StatusInternalServerError)
 					data.ToJSON(&GenericError{Message: err.Error()}, rw)
 
-					// TODO: redirect to login
 					return
 				}
 
@@ -91,14 +87,12 @@ func (userHandler *UserHandler) MiddlewareValidateAuth(next http.Handler) http.H
 				rw.WriteHeader(http.StatusUnauthorized)
 				data.ToJSON(&GenericError{Message: "Token invalid"}, rw)
 
-				// TODO: redirect to login
 				return
 			}
 		} else {
 			rw.WriteHeader(http.StatusUnauthorized)
 			data.ToJSON(&GenericError{Message: "Token invalid"}, rw)
 
-			// TODO: redirect to login
 			return
 		}
 	})
