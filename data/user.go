@@ -76,7 +76,7 @@ func (user *User) UpdateUser(targetUser *database.MasterUser) error {
 	updateUser.Email = targetUser.Email
 	updateUser.Phone = targetUser.Phone
 	updateUser.Modified = time.Now().Local()
-	updateUser.ModifiedBy = "SYSTEM"
+	updateUser.ModifiedBy = targetUser.Username
 
 	config.DB.Save(updateUser)
 
