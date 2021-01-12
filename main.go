@@ -101,7 +101,7 @@ func main() {
 	patchRequest := serveMux.Methods(http.MethodPatch).Subrouter()
 
 	// update signed in user patch handler
-	patchRequest.HandleFunc("/user/update/signed", userHandler.UpdateSignedUser)
+	patchRequest.HandleFunc("/update/signed", userHandler.UpdateSignedUser)
 
 	// patch global middleware
 	patchRequest.Use(
