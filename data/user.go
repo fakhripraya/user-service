@@ -9,6 +9,7 @@ import (
 	"github.com/fakhripraya/user-service/config"
 	"github.com/fakhripraya/user-service/database"
 	"github.com/hashicorp/go-hclog"
+	"github.com/jinzhu/gorm"
 	"github.com/srinathgs/mysqlstore"
 )
 
@@ -63,22 +64,40 @@ func (user *User) GetCurrentUser(rw http.ResponseWriter, r *http.Request, store 
 // UpdateUser is a function to update the given user model
 func (user *User) UpdateUser(targetUser *database.MasterUser) error {
 
-	// work with database
-	// looking for an existing user to update
-	var updateUser database.MasterUser
-	if err := config.DB.Where("username = ?", targetUser.Username).First(&updateUser).Error; err != nil {
+	// proceed to create the new approval with transaction scope
+	err := config.DB.Transaction(func(tx *gorm.DB) error {
 
-		return fmt.Errorf("username does not exist")
+		// work with database
+		// looking for an existing user to update
+		var updateUser database.MasterUser
+		var dbErr error
+
+		if dbErr = config.DB.Where("username = ?", targetUser.Username).First(&updateUser).Error; dbErr != nil {
+
+			return fmt.Errorf("username does not exist")
+		}
+
+		updateUser.RoleID = targetUser.RoleID
+		updateUser.DisplayName = targetUser.DisplayName
+		updateUser.Email = targetUser.Email
+		updateUser.Phone = targetUser.Phone
+		updateUser.Modified = time.Now().Local()
+		updateUser.ModifiedBy = targetUser.Username
+
+		// update the user
+		dbErr = config.DB.Save(updateUser).Error
+
+		if dbErr != nil {
+			return dbErr
+		}
+
+		return nil
+
+	})
+
+	if err != nil {
+		return err
 	}
-
-	updateUser.RoleID = targetUser.RoleID
-	updateUser.DisplayName = targetUser.DisplayName
-	updateUser.Email = targetUser.Email
-	updateUser.Phone = targetUser.Phone
-	updateUser.Modified = time.Now().Local()
-	updateUser.ModifiedBy = targetUser.Username
-
-	config.DB.Save(updateUser)
 
 	return nil
 }
