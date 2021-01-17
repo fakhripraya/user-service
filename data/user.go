@@ -87,6 +87,7 @@ func (user *User) UpdateUser(targetUser *database.MasterUser) error {
 		// update the user
 		dbErr = config.DB.Save(updateUser).Error
 
+		// if transaction error, return the error
 		if dbErr != nil {
 			return dbErr
 		}
@@ -95,6 +96,7 @@ func (user *User) UpdateUser(targetUser *database.MasterUser) error {
 
 	})
 
+	// if transaction error, return the error
 	if err != nil {
 		return err
 	}
