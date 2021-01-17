@@ -45,14 +45,14 @@ func (user *User) GetCurrentUser(rw http.ResponseWriter, r *http.Request, store 
 	if session.Values["userLoggedin"] == nil {
 		rw.WriteHeader(http.StatusUnauthorized)
 
-		return nil, err
+		return nil, fmt.Errorf("Error 401")
 	}
 
 	// work with database
 	// look for the current user logged in in the db
 	var currentUser database.MasterUser
 	if err := config.DB.Where("username = ?", session.Values["userLoggedin"].(string)).First(&currentUser).Error; err != nil {
-		rw.WriteHeader(http.StatusUnauthorized)
+		rw.WriteHeader(http.StatusBadRequest)
 
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (user *User) GetCurrentUser(rw http.ResponseWriter, r *http.Request, store 
 // UpdateUser is a function to update the given user model
 func (user *User) UpdateUser(targetUser *database.MasterUser) error {
 
-	// proceed to create the new approval with transaction scope
+	// proceed to update the user with transaction scope
 	err := config.DB.Transaction(func(tx *gorm.DB) error {
 
 		// work with database

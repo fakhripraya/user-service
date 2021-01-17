@@ -14,6 +14,7 @@ var MySigningKey string
 
 // ConfigInit is a function to initialize app configuration
 func ConfigInit(config *entities.Configuration) error {
+
 	// determine the application state via env
 	var environment string
 	if os.Getenv("APP_STATE") != "production" && os.Getenv("APP_STATE") != "prod" {

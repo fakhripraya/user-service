@@ -18,6 +18,12 @@ func (userHandler *UserHandler) UpdateSignedUser(rw http.ResponseWriter, r *http
 	var targetUser *database.MasterUser
 	targetUser, err := userHandler.user.GetCurrentUser(rw, r, userHandler.store)
 
+	if err != nil {
+		data.ToJSON(&GenericError{Message: err.Error()}, rw)
+
+		return
+	}
+
 	if userReq.RoleID != 0 {
 		targetUser.RoleID = userReq.RoleID
 	}
@@ -27,13 +33,17 @@ func (userHandler *UserHandler) UpdateSignedUser(rw http.ResponseWriter, r *http
 
 	// update the user
 	err = userHandler.user.UpdateUser(targetUser)
+
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
 		data.ToJSON(&GenericError{Message: err.Error()}, rw)
 
 		return
 	}
 
+	// return success status and message
 	rw.WriteHeader(http.StatusOK)
+	data.ToJSON(&GenericError{Message: "Update sukses"}, rw)
+
 	return
 }
