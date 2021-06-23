@@ -23,7 +23,7 @@ func (userHandler *UserHandler) GetUser(rw http.ResponseWriter, r *http.Request)
 	}
 
 	// get the requested user data
-	var reqUser *database.MasterUser
+	var reqUser = &database.MasterUser{}
 	if err := config.DB.Where("id = ?", id).First(&reqUser).Error; err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		data.ToJSON(&GenericError{Message: err.Error()}, rw)
